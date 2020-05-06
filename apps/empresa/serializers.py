@@ -57,7 +57,7 @@ class SucursalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sucursal
-        fields = ['id','nombre','telefono','direccion','foto','empresa','hora_inicio','hora_fin']
+        fields = ['id','nombre','disponible','telefono','direccion','foto','empresa','hora_inicio','hora_fin']
     
 
 
@@ -536,3 +536,8 @@ class EditarPedidoSerializer(serializers.ModelSerializer):
 #             if p.sucursal.id != self.instance.sucursal.id:
 #                 raise serializers.ValidationError('Algunos de los productos no pertenecen a la sucursal a la cual quiere hacer el pedido')
 #         return data
+
+class CambiarDisponibleSucursal_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Sucursal
+        fields = ['disponible']

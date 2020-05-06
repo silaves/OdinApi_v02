@@ -35,7 +35,7 @@ from .serializers import (EmpresaSerializer, EmpresaEditarSerializer, SucursalSe
     CategoriaEmpresaSerializer,ResponseCombo,SucursalEditarSerializer,ResponseComboEditar,ResponseProducto,ResponseProductodID,
     ResponsePedidos,ResponsePedidosEditar,CrearPedidoSerializer,EditarPedidoSerializer,ResponseTokenFirebase,
     # crear combos
-    CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer)
+    CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer)
 from apps.autenticacion.serializers import UsuarioSerializer
 from apps.autenticacion.models import Usuario
 from apps.autenticacion.views import get_user_by_token, is_member
@@ -194,6 +194,26 @@ def getSucursal(request, id_sucursal):
     data = SucursalSerializer(producto).data
     return Response(data)
 
+
+# cambiar disponibilidad de la sucursal
+@swagger_auto_schema(method="POST",responses={200:'Se cambio el estado de disponibilidad de la sucursal'},operation_id="Cambiar disponibilidad de la sucursal")
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def cambiar_diponible_sucursal(request, id_sucursal):
+    usuario = get_user_by_token(request)
+    sucursal = revisar_sucursal(id_sucursal)
+    revisar_propietario_sucursal(usuario, sucursal)
+    obj = CambiarDisponibleSucursal_Serializer(sucursal, data=request.data)
+    obj.is_valid(raise_exception=True)
+    obj.save()
+    try:
+        if obj.validated_data['disponible'] is True:
+            mensaje = 'La sucursal ahora se encuentra abierta.'
+        else:
+            mensaje = 'La sucursal ahora se encuentra cerrada'
+    except:
+        mensaje = 'No se detecto ningun cambio'
+    return Response({'mensaje':mensaje})
 
 
 # PRODUCTO

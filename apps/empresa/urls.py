@@ -13,6 +13,7 @@ urlpatterns = [
     path('empresa/sucursal/lista/', views.getAll_Sucursales, name='Lista todas Sucursales'),
     path('empresa/<int:id_empresa>/sucursal/lista/', views.getSucursales, name='Lista de Sucursales por Empresa'),
     path('empresa/<int:id_empresa>/sucursal/<int:id_sucursal>/', views.getSucursal, name='Obtener Sucursal'),
+    path('empresa/sucursal/<int:id_sucursal>/disponible/', views.cambiar_diponible_sucursal, name='Cambiar Disponibilidad Sucursal'),
 
     path('empresa/sucursal/<int:id_sucursal>/token_firebase/',views.get_token_firebase, name='Obtener Toke Firebase'),
     # PRODUCTO
