@@ -13,4 +13,7 @@ urlpatterns = [
     # path('categoria/crear/', views.crear_categoria, name='Crear Categoria Articulos'),
     path('categoria/<str:estado>/lista/', views.lista_categoria_estado, name='Listar Categorias'),
     path('categoria/<int:id_categoria>/lista/hijos/', views.lista_subcategorias_hijo, name='Listar Categoria Hijos'),
+
+    # ARTICULOS
+    # path('articulo/crear/', views.crear_articulo, name='Crear Articulo'),
 ]

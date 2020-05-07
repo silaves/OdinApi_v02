@@ -155,28 +155,39 @@ def editar_sucursal(request,id_sucursal):
 
 
 # lista de sucursales por empresa
-@swagger_auto_schema(method="GET",responses={200:SucursalSerializer(many=True)},operation_id="Lista de Sucursales by Empresa")
+@swagger_auto_schema(method="GET",responses={200:SucursalSerializer(many=True)},operation_id="Lista de Sucursales by Empresa",
+    operation_description="Para el estado:\n\n\t'A' para activos \n\t'I' para inactivos \n\t'T' para todos las sucursales")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-def getSucursales(request, id_empresa):
-    usuario = get_user_by_token(request)
+def getSucursales(request, id_empresa, estado):
     empresa = revisar_empresa(id_empresa)
-    sucursales = revisar_sucursales_by_empresa(empresa)
+    revisar_estado_producto(estado)
+    if estado == 'A':
+        sucursales = Sucursal.objects.filter(empresa__id=id_empresa, estado=True)
+    elif estado == 'I':
+        sucursales = Sucursal.objects.filter(empresa__id=id_empresa, estado=False)
+    else:
+        sucursales = Sucursal.objects.filter(empresa__id=id_empresa)
+    
     data = SucursalSerializer(sucursales, many=True).data
     return Response(data)
 
 
 
 # lista de todas las sucursales
-@swagger_auto_schema(method="GET",responses={200:SucursalSerializer(many=True)},operation_id="Lista de Todas las Sucursales")
+@swagger_auto_schema(method="GET",responses={200:SucursalSerializer(many=True)},operation_id="Lista de Todas las Sucursales",
+    operation_description="Para el estado:\n\n\t'A' para activos \n\t'I' para inactivos \n\t'T' para todos las sucursales")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-def getAll_Sucursales(request):
-    usuario = get_user_by_token(request)
-    try:
+def getAll_Sucursales(request, estado):
+    revisar_estado_producto(estado)
+    if estado == 'A':
+        sucursales = Sucursal.objects.filter(estado=True)
+    elif estado == 'I':
+        sucursales = Sucursal.objects.filter(estado=False)
+    else:
         sucursales = Sucursal.objects.all()
-    except:
-        raise NotFound('No se encontro a la sucursal','sucursal_not_found')
+    
     data = SucursalSerializer(sucursales, many=True).data
     return Response(data)
 

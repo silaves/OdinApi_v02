@@ -57,14 +57,14 @@ class SucursalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sucursal
-        fields = ['id','nombre','disponible','telefono','direccion','foto','empresa','hora_inicio','hora_fin']
+        fields = ['id','nombre','disponible','estado','telefono','direccion','foto','empresa','hora_inicio','hora_fin']
     
 
 
 class SucursalEditarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sucursal
-        fields = ['nombre','telefono','direccion','foto','hora_inicio','hora_fin']
+        fields = ['nombre','telefono','direccion','foto','hora_inicio','hora_fin','estado']
 
 
 class ProductoFinalSerializer(serializers.ModelSerializer):

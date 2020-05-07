@@ -111,7 +111,7 @@ class SubCategoriaArticulo(models.Model):
 
 class Detalle(models.Model):
     label = models.CharField(max_length=30, blank=False)
-    nombre = models.CharField(max_length=50)
+    valor = models.CharField(max_length=50)
     estado = models.BooleanField(default=True, blank=True)
     articulo = models.ForeignKey(Articulo, on_delete=models.CASCADE)
 
@@ -125,7 +125,7 @@ class Detalle(models.Model):
 
 
 class SubDetalle(models.Model):
-    nombre = models.CharField(max_length=30, blank=False)
+    valor = models.CharField(max_length=30, blank=False)
     estado = models.BooleanField(default=True, blank=True)
     detalle = models.ForeignKey(Detalle, on_delete=models.CASCADE)
 

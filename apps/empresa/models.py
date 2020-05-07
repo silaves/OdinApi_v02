@@ -42,6 +42,7 @@ class Sucursal(models.Model):
     hora_inicio = models.TimeField(default='15:00:00',blank=True)
     hora_fin = models.TimeField(default='15:00:00',blank=True)
     disponible = models.BooleanField(default=False, blank=True)
+    estado = models.BooleanField(default=True, blank=True)
     foto = models.ImageField(upload_to="sucursal/", default='sucursal/no-img.jpg', null=True, blank=True,
                              validators=[
                                  tamaño_del_archivo,

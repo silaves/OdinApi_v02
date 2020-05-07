@@ -150,4 +150,24 @@ class VerCategoriaHijosArticulo_Serializer(serializers.ModelSerializer):
 
 # ARTICULOS
 
-# class CrearArticulo_Serializer(serializers.ModelSerializer):
+class DetalleArticulo_Serializer(serializers.ModelSerializer):
+    valor = serializers.ListField(
+        required=True,
+        child = serializers.CharField(max_length=50,required=True)
+    )
+
+    class Meta:
+        model = Detalle
+        fields = ['label','valor']
+
+class CrearArticulo_Serializer(serializers.ModelSerializer):
+    detalles = DetalleArticulo_Serializer(many=True)
+
+    class Meta:
+        model = Articulo
+        fields = ['nombre','descripcion','precio','tienda','detalles']
+    
+    def validated_tienda(self, value):
+        if value.empresa.empresario.id != self.context['id_usuario']:
+            raise ValidationError('Usted no es propietario de la tienda')
+        return value
