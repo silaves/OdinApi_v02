@@ -175,19 +175,19 @@ INSERT INTO "EMPRESA" (id, nombre, descripcion, estado, categoria_id, empresario
 (11,'Papi Pollo','venta de pollos a la broaster',true,1,12),
 (12,'Macondo de Pizza Pazza Hotel - RestoBar','venta de pizzas',true,1,13);
 
-INSERT INTO "SUCURSAL" (id, nombre, disponible, telefono, direccion, hora_inicio, hora_fin, foto, empresa_id) VALUES
-(1,'Centro',false,46636448,'Gral Trigo 655, Tarija','10:00:00','23:30:00','sucursal/crocan.png',1),
-(2,'Centro',false,46658800,'Calle. Padilla 110, Tarija','10:00:00','23:30:00','sucursal/elis.jpg',2),
-(3,'Centro',false,46649666,'Calle Sucre entre Bolívar y Domingo Paz, Tarija Bolivia','10:00:00','23:30:00','sucursal/rico_pollo.jpg',3),
-(4,'Centro',false,46630656,'La Madrid esq. Sucre, Tarija','10:00:00','23:30:00','sucursal/gattopardo.jpg',4),
-(5,'Centro',false,69322200,'Gral Trigo entre Ingavi y Madrid, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',5),
-(6,'Centro',false,46650505,'Calle 15 de Abril | Plaza Sucre, Tarija','08:00:00','23:00:00','sucursal/no-img.jpg',6),
-(7,'Centro',false,46650506,'La madrid 372 | Frente a la Plaza Principal, Tarija','10:00:00','23:00:00','sucursal/no-img.jpg',7),
-(8,'Centro',false,46650507,'Puente Bolivar s/n, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',8),
-(9,'Centro',false,46663057,'calle 15 de Abril #130 | entre Colon y Daniel Campons, Tarija','11:00:00','00:00:00','sucursal/no-img.jpg',9),
-(10,'Centro',false,46650000,'Abril Pasando G. Trigo 15 | Plaza Principal, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',10),
-(11,'Centro',false,78227757,'Calle Bolivar #366, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',11),
-(12,'Centro',false,46642107,'Calle 15 de Abril | Esq. Sucre, Tarija','09:00:00','15:00:00','sucursal/no-img.jpg',12);
+INSERT INTO "SUCURSAL" (id, nombre, disponible,estado, telefono, direccion, hora_inicio, hora_fin, foto, empresa_id) VALUES
+(1,'Centro',false,true,46636448,'Gral Trigo 655, Tarija','10:00:00','23:30:00','sucursal/crocan.png',1),
+(2,'Centro',false,true,46658800,'Calle. Padilla 110, Tarija','10:00:00','23:30:00','sucursal/elis.jpg',2),
+(3,'Centro',false,true,46649666,'Calle Sucre entre Bolívar y Domingo Paz, Tarija Bolivia','10:00:00','23:30:00','sucursal/rico_pollo.jpg',3),
+(4,'Centro',false,true,46630656,'La Madrid esq. Sucre, Tarija','10:00:00','23:30:00','sucursal/gattopardo.jpg',4),
+(5,'Centro',false,true,69322200,'Gral Trigo entre Ingavi y Madrid, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',5),
+(6,'Centro',false,true,46650505,'Calle 15 de Abril | Plaza Sucre, Tarija','08:00:00','23:00:00','sucursal/no-img.jpg',6),
+(7,'Centro',false,true,46650506,'La madrid 372 | Frente a la Plaza Principal, Tarija','10:00:00','23:00:00','sucursal/no-img.jpg',7),
+(8,'Centro',false,true,46650507,'Puente Bolivar s/n, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',8),
+(9,'Centro',false,true,46663057,'calle 15 de Abril #130 | entre Colon y Daniel Campons, Tarija','11:00:00','00:00:00','sucursal/no-img.jpg',9),
+(10,'Centro',false,true,46650000,'Abril Pasando G. Trigo 15 | Plaza Principal, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',10),
+(11,'Centro',false,true,78227757,'Calle Bolivar #366, Tarija','10:00:00','23:30:00','sucursal/no-img.jpg',11),
+(12,'Centro',false,true,46642107,'Calle 15 de Abril | Esq. Sucre, Tarija','09:00:00','15:00:00','sucursal/no-img.jpg',12);
 
 INSERT INTO "PRODUCTO_FINAL" (id, nombre, descripcion, precio, estado, foto, sucursal_id) VALUES
 (1,'crocan pollo','pollo a la broaster ¼ de pollo','25.0 ',true,'productos/e1_1.jpg',1),

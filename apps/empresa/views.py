@@ -831,10 +831,82 @@ def cambiar_pedido_en_cancelado(request, id_pedido):
 
     return Response({'mensaje':'El pedido ha sido cancelado'})
 
+# repartidor
+
+# tomar pedido
+@swagger_auto_schema(method="POST",responses={200:'asd'},operation_id="Repartidor - Aceptar Pedido",
+    operation_description='Permite al repartidor aceptar un pedido.')
+@api_view(['POST'])
+@permission_classes((IsAuthenticated,))
+def aceptar_pedido(request,id_pedido):
+    usuario = get_user_by_token(request)
+    if not is_member(usuario,'repartidor'):
+        return Response({'error':'No esta autorizado'})
+    pedido = revisar_pedido(id_pedido)
+    if pedido.estado == 'E':
+        if pedido.repartidor is None:
+            pedido.repartidor = usuario
+            pedido.save()
+        else:
+            raise PermissionDenied('El pedido ya ha sido tomado por otro usuario')
+    else:
+        raise PermissionDenied('El pedido no se encuentra en curso')
+
+    return Response({'mensaje':'Ha tomado el pedido'})
+
+# obtener pedidos de todas las sucursales (en curso)
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de todos los Pedidos (DIA)",
+    operation_description='Devuelve la lista de todos los pedidos que se encuentren en curso (E) y que  no hallan sido tomados por ningun otro repartidor. ')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_for_repartidor(request):
+    # usuario = get_user_by_token(request)
+    # los pedidos se haran por dia laboral
+    hora_actual = make_aware(datetime.datetime.now())
+    hora_inicio = get_hora_apertura(hora_actual)
+    hora_fin = hora_actual
+    pedidos = Pedido.objects.filter(estado='E',repartidor=None,fecha__gte=hora_inicio,fecha__lte=hora_fin)
+    data = PedidosSucursalCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+# obtener pedidos por repartidor del dia
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Repartidor (DIA)",
+    operation_description='Devuelve la lista de pedidos del dia por repartidor segun el estado:\n\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_by_repartidor_dia(request,estado):
+    usuario = get_user_by_token(request)
+    # los pedidos se haran por dia laboral
+    estado = revisar_estado_pedido_repartidor(estado)
+    hora_actual = make_aware(datetime.datetime.now())
+    hora_inicio = get_hora_apertura(hora_actual)
+    hora_fin = hora_actual
+    pedidos = Pedido.objects.filter(estado=estado,repartidor__id=usuario.id,fecha__gte=hora_inicio,fecha__lte=hora_fin)
+    data = PedidosSucursalCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+
+# obtener pedidos por repartidor semana
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Repartidor (ULTIMOS 7 DIAS)",
+    operation_description='Devuelve la lista de pedidos de los ultmos 7 dias por repartidor segun el estado:\n\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_by_repartidor_semana(request,estado):
+    usuario = get_user_by_token(request)
+    # los pedidos se haran por dia laboral
+    estado = revisar_estado_pedido_repartidor(estado)
+    hora_actual = make_aware(datetime.datetime.now())
+    hora_inicio = get_hora_apertura(hora_actual)
+    hora_fin = hora_actual
+    pedidos = Pedido.objects.filter(estado=estado,repartidor__id=usuario.id,fecha__gte=hora_inicio-timedelta(days=7),fecha__lte=hora_fin)
+    data = PedidosSucursalCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+# fin repartidor
 
 
 # obtener pedidos por sucursal
-@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos by Sucursal, estado(A,E,F)")
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos by Sucursal (del dia), estado(A,E,F)")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_by_sucursal(request, id_sucursal, estado):
@@ -1291,9 +1363,21 @@ def revisar_sucursal(id_sucursal):
     except:
         raise NotFound('No se encontro la sucursal','sucursal_not_found')
 
+def revisar_pedido(id_pedido):
+    try:
+        pedido = Pedido.objects.get(pk=id_pedido)
+        return pedido
+    except:
+        raise NotFound('No se encontro el pedido')
+
 def revisar_estado_pedido(estado):
     if not(estado == 'A' or estado == 'E' or estado == 'F' or estado == 'C'):
         raise NotFound('No existe la ruta','empresa not found')
+    return estado
+
+def revisar_estado_pedido_repartidor(estado):
+    if not(estado == 'E' or estado == 'F' or estado == 'C'):
+        raise NotFound('No existe la ruta')
     return estado
 
 def revisar_estado_producto(estado):

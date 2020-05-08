@@ -365,7 +365,7 @@ class PedidosCustomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ('id','sucursal','cliente','estado','fecha','direccion','productos')
+        fields = ('id','sucursal','cliente','repartidor','estado','fecha','direccion','productos')
     
     def cargar_productos(self, obj):
         if obj.id:
@@ -398,7 +398,7 @@ class PedidosSucursalCustomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ('id','sucursal','cliente','estado','fecha','direccion','productos','total')
+        fields = ('id','sucursal','cliente','repartidor','estado','fecha','direccion','productos','total')
     
     def cargar_productos(self, obj):
         if obj.id:

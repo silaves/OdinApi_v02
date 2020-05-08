@@ -15,5 +15,5 @@ urlpatterns = [
     path('categoria/<int:id_categoria>/lista/hijos/', views.lista_subcategorias_hijo, name='Listar Categoria Hijos'),
 
     # ARTICULOS
-    # path('articulo/crear/', views.crear_articulo, name='Crear Articulo'),
+    path('articulo/crear/', views.crear_articulo, name='Crear Articulo'),
 ]
