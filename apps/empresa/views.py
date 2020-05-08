@@ -633,10 +633,10 @@ def crear_pedido_f(request):
     pedido.estado = 'A'
     pedido.sucursal = obj.validated_data['sucursal']
     try:
-        dir = obj.validated_data['direccion']
+        dir = obj.validated_data['ubicacion']
     except:
         dir = ''
-    pedido.direccion = dir
+    pedido.ubicacion = dir
     pedido.save()
     for x in obj.validated_data['productos']:
         pf = x['producto_final']
@@ -734,16 +734,16 @@ def editar_pedido_f(request,id_pedido):
     obj.is_valid(raise_exception=True)
 
     try:
-        direccion = obj.validated_data['direccion']
+        ubicacion = obj.validated_data['ubicacion']
     except:
-        direccion = pedido.direccion
+        ubicacion = pedido.ubicacion
     try:
         obj.validated_data['productos']
         is_productos = True
     except:
         is_productos = False
     
-    pedido.direccion = direccion
+    pedido.ubicacion = ubicacion
     pedido.save()
     if is_productos is True:
         productos = obj.validated_data['productos']

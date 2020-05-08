@@ -57,14 +57,14 @@ class SucursalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sucursal
-        fields = ['id','nombre','disponible','estado','telefono','direccion','foto','empresa','hora_inicio','hora_fin']
+        fields = ['id','nombre','disponible','estado','telefono','ubicacion','direccion','foto','empresa','hora_inicio','hora_fin']
     
 
 
 class SucursalEditarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sucursal
-        fields = ['nombre','telefono','direccion','foto','hora_inicio','hora_fin','estado']
+        fields = ['nombre','telefono','ubicacion','direccion','foto','hora_inicio','hora_fin','estado']
 
 
 class ProductoFinalSerializer(serializers.ModelSerializer):
@@ -365,7 +365,7 @@ class PedidosCustomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ('id','sucursal','cliente','repartidor','estado','fecha','direccion','productos')
+        fields = ('id','sucursal','cliente','repartidor','estado','fecha','ubicacion','productos')
     
     def cargar_productos(self, obj):
         if obj.id:
@@ -398,7 +398,7 @@ class PedidosSucursalCustomSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ('id','sucursal','cliente','repartidor','estado','fecha','direccion','productos','total')
+        fields = ('id','sucursal','cliente','repartidor','estado','fecha','ubicacion','productos','total')
     
     def cargar_productos(self, obj):
         if obj.id:
@@ -467,7 +467,7 @@ class CrearPedidoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ('sucursal','direccion','productos')
+        fields = ('sucursal','ubicacion','productos')
     
     def validate(self, data):
         for x in data['productos']:
@@ -486,7 +486,7 @@ class EditarPedidoSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Pedido
-        fields = ('direccion','productos')
+        fields = ('ubicacion','productos')
     
     def validate(self, data):
         try:

@@ -2,7 +2,8 @@ INSERT INTO "auth_group" (id, name) values
 (1,'administrador'),
 (2,'cliente'),
 (3,'empresario'),
-(4,'taxista');
+(4,'taxista'),
+(5,'repartidor');
 
 INSERT INTO "auth_group_permissions" (id, group_id, permission_id) VALUES
 (1,1,48),
@@ -12,7 +13,9 @@ INSERT INTO "auth_group_permissions" (id, group_id, permission_id) VALUES
 (5,3,48),
 (6,3,52),
 (7,4,48),
-(8,4,52);
+(8,4,52),
+(9,5,48),
+(10,5,52);
 
 INSERT INTO "USUARIO" (id, password, is_superuser, username, email, is_staff, is_active, fecha_registro, nombres, apellidos, foto) VALUES
 (2,'pbkdf2_sha256$180000$oRHMhB4OjKi1$4cXF8zIS1kHGhXqhHqJ/TZNsWcmmxDrWoUcmCbYheUg=',false,'pablobedoya','pablobedoya@gmail.com',false,true,'2020-04-12 18:38:47.39342-04','Pablo','Bedoya','perfiles/user1.jpeg'),
