@@ -392,9 +392,25 @@ class ProFinalSucursalSerializer(serializers.ModelSerializer):
         else:
             return None
 
+# para cargar empresario sucursal y empresa
+class PedidoEmpresaSerializer(serializers.ModelSerializer):
+    categoria = CategoriaEmpresaSerializer()
+    empresario = PerfilSerializer()
+    
+    class Meta:
+        model = Empresa
+        fields = ['id','nombre','descripcion','empresario','categoria']
+
+class PedidoSucursalSerializer(serializers.ModelSerializer):
+    empresa = PedidoEmpresaSerializer()
+
+    class Meta:
+        model = Sucursal
+        fields = ['id','nombre','disponible','estado','telefono','ubicacion','direccion','foto','empresa','hora_inicio','hora_fin']
+        
 class PedidosSucursalCustomSerializer(serializers.ModelSerializer):
     cliente = PerfilSerializer()
-    sucursal = SucursalSerializer()
+    sucursal = PedidoSucursalSerializer()
     productos = serializers.SerializerMethodField('cargar_productos')
 
     class Meta:
