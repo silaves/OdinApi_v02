@@ -186,11 +186,12 @@ def lista_subcategorias_hijo(request, id_categoria):
 # ARTICULOS
 
 # crear articulo
-@swagger_auto_schema(method='POST', responses={200:CrearArticulo_Serializer}, operation_id='Crear articulo',
-    operation_description='asd')
+# @swagger_auto_schema(method='POST', responses={200:CrearArticulo_Serializer}, operation_id='Crear articulo',
+#     operation_description='asd')
 @api_view(['POST'])
 @permission_classes([IsAuthenticated,])
 def crear_articulo(request):
+    print('ratas')
     usuario = get_user_by_token(request)
     obj = CrearArticulo_Serializer(data=request.data, context={'id_usuario':usuario.id})
     obj.is_valid(raise_exception=True)

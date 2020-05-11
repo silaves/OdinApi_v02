@@ -394,6 +394,7 @@ class ProFinalSucursalSerializer(serializers.ModelSerializer):
 
 class PedidosSucursalCustomSerializer(serializers.ModelSerializer):
     cliente = PerfilSerializer()
+    sucursal = SucursalSerializer()
     productos = serializers.SerializerMethodField('cargar_productos')
 
     class Meta:

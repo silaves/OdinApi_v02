@@ -1,3 +1,4 @@
+import re
 from django.conf import settings
 from rest_framework import serializers
 
@@ -165,11 +166,30 @@ class CrearArticulo_Serializer(serializers.ModelSerializer):
         model = Articulo
         fields = ['nombre','descripcion','precio','tienda','detalles']
     
+    def validate_detalles(self, value):
+        for x in value:
+            line = x.split(':')
+            #validar el formato
+            if len(line) != 2:
+                raise ValidationError('El formato del detalle %s es incorrecto, debe tener la siguiente forma label:detalle1,detalle2' % x)
+            label = line[0]
+            values = line[1]
+            pattern = re.compile("^[a-zA-Z\u00C0-\u00FF]{2,30}$")
+            if not pattern.match(label):
+                raise ValidationError('Formato de label incorrecto')
+            pattern = re.compile("^[a-zA-Z\u00C0-\u00FF]*$")
+            val = values.split(',')
+            for v in val:
+                if not pattern.match(v):
+                    raise ValidationError('Formato de values incorrecto')
+            # validar label
+            
+            # print(label,' ',detalles)
+        return value
+
     def validated_tienda(self, value):
         if value.empresa.empresario.id != self.context['id_usuario']:
             raise ValidationError('Usted no es propietario de la tienda')
         return value
     
-    def validated_detalles(slef, value):
-        detalle = value.split(':')
-        label = detalle[0]
+    
