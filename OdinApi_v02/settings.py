@@ -168,6 +168,7 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'temp')
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 MAXIMO_TAM_ARCHIVOS = 3
+DATE_FORMAT = '%Y-%m-%d'
 BASE_STATIC_FILES = BASE_DIR
 
 

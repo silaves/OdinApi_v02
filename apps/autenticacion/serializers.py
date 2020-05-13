@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from drf_yasg.utils import swagger_serializer_method
 
-from .models import Usuario, Perfil
+from .models import Usuario, Perfil, Ciudad
 
 # registrar nuevo usuario
 class RegistrarseSerializer(serializers.ModelSerializer):
@@ -176,25 +176,31 @@ class PerfilNormalSerializer(serializers.ModelSerializer):
 class UsuarioNormalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Usuario
-        fields = ('nombres','apellidos','foto','token_firebase')
+        fields = ('nombres','apellidos','foto','token_firebase','ciudad')
 
 class UsuarioEditResponse(serializers.ModelSerializer):
     telefono = serializers.IntegerField(required=False)
 
     class Meta:
         model = Usuario
-        fields = ('nombres','apellidos','foto','token_firebase','telefono')
+        fields = ('nombres','apellidos','foto','token_firebase','telefono','ciudad')
         
+
+class VerCiudad_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Ciudad
+        fields = ['id','nombre','estado']
 
 
 class PerfilSerializer(serializers.ModelSerializer):
     telefono = serializers.SerializerMethodField('getTelefono')
     calificacion = serializers.SerializerMethodField('getCalificacion')
     disponibilidad = serializers.SerializerMethodField('getDisponibilidad')
+    ciudad = VerCiudad_Serializer()
 
     class Meta:
         model = Usuario
-        fields = ('id','username','email','nombres','apellidos','token_firebase','foto','perfil','telefono','calificacion','disponibilidad','grupos')
+        fields = ('id','username','email','nombres','apellidos','token_firebase','foto','ciudad','perfil','telefono','calificacion','disponibilidad','grupos')
     
     def getTelefono(self, usuario):
         try:
@@ -249,7 +255,7 @@ class CrearEmpresario_Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Usuario
-        fields = ('username','password','email','nombres','apellidos','foto','telefono')
+        fields = ('username','password','email','nombres','apellidos','foto','telefono','ciudad')
 
     def create(self, validated_data):
         try:

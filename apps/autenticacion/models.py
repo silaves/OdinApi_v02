@@ -12,6 +12,19 @@ from django.core.exceptions import NON_FIELD_ERRORS
 from apps.autenticacion.managers import CustomUserManager
 
 
+class Ciudad(models.Model):
+    nombre = models.CharField(max_length=40, unique=True)
+    estado = models.BooleanField(default=True)
+
+    class Meta:
+        db_table = 'CIUDAD'
+        verbose_name = _('ciudad')
+        verbose_name_plural = _('ciudades')
+    
+    def __str__(self):
+        return self.nombre
+
+
 class Usuario(AbstractBaseUser, PermissionsMixin):
     username = models.CharField(_('nombre de usuario'), max_length=30, unique=True)
     email = models.EmailField(_('correo electronico'), unique=True)
@@ -22,6 +35,7 @@ class Usuario(AbstractBaseUser, PermissionsMixin):
     apellidos = models.CharField(_('Apellidos'), blank=True, max_length=40)
     token_firebase = models.CharField(_('TokenFirebase'),max_length=255,blank=True,null=True)
     foto = models.ImageField(upload_to='perfiles/', default = 'perfiles/no-img.jpg', blank=True, null=True)
+    ciudad = models.ForeignKey(Ciudad,blank=True,null=True, on_delete=models.PROTECT)
     groups = models.ManyToManyField(blank=True, related_name='user_set', related_query_name='user', to='auth.Group', 
         verbose_name='grupos1',db_table='USUARIO_GRUPO',
         help_text='Los grupos a los que pertenece este usuario. Un usuario obtendrá todos los '

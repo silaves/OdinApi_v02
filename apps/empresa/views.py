@@ -1,4 +1,4 @@
-import datetime
+from datetime import date, datetime, time
 import json
 import jwt
 from drf_yasg.utils import swagger_auto_schema
@@ -33,11 +33,11 @@ from .models import Empresa, Sucursal, ProductoFinal, Combo, CategoriaEmpresa, P
 from .serializers import (EmpresaSerializer, EmpresaEditarSerializer, SucursalSerializer, ProductoFinalSerializer, ProductoFinalEditarSerializer,
     ProductoFinalVerSerializer, ps,PedidosCustomSerializer,PedidosSucursalCustomSerializer, ProFinalSucursalSerializer,
     CategoriaEmpresaSerializer,ResponseCombo,SucursalEditarSerializer,ResponseComboEditar,ResponseProducto,ResponseProductodID,
-    ResponsePedidos,ResponsePedidosEditar,CrearPedidoSerializer,EditarPedidoSerializer,ResponseTokenFirebase,
+    ResponsePedidos,ResponsePedidosEditar,CrearPedidoSerializer,EditarPedidoSerializer,ResponseTokenFirebase,PedidosRangoFecha_Sucursal,
     # crear combos
-    CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer)
+    CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer,CrearSucursal_Serializer)
 from apps.autenticacion.serializers import UsuarioSerializer
-from apps.autenticacion.models import Usuario
+from apps.autenticacion.models import Usuario, Ciudad
 from apps.autenticacion.views import get_user_by_token, is_member
 
 # # lista de usuarios
@@ -123,16 +123,16 @@ def getEmpresaByUsuario(request):
 # SUCURSALES
 
 # crear sucursal
-@swagger_auto_schema(method="POST",request_body=SucursalSerializer,responses={200:'Se ha agregado la sucursal correctamente'},
+@swagger_auto_schema(method="POST",request_body=CrearSucursal_Serializer,responses={200:'Se ha agregado la sucursal correctamente'},
     operation_id="Crear Sucursal")
 @api_view(['POST'])
 @permission_classes((IsAuthenticated,))
 def crearSucursal(request):
     usuario = get_user_by_token(request)
+    obj = CrearSucursal_Serializer(data=request.data)
+    obj.is_valid(raise_exception=True)
     empresa = revisar_empresa(int(request.data.get('empresa')))
     revisar_propietario_empresa(usuario, empresa)
-    obj = SucursalSerializer(data=request.data)
-    obj.is_valid(raise_exception=True)
     obj.save()
     return Response({'mensaje':'Se ha agregado la sucursal correctamente'})
 
@@ -179,14 +179,15 @@ def getSucursales(request, id_empresa, estado):
     operation_description="Para el estado:\n\n\t'A' para activos \n\t'I' para inactivos \n\t'T' para todos las sucursales")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-def getAll_Sucursales(request, estado):
+def getAll_Sucursales(request, estado, id_ciudad):
+    ciudad = revisar_ciudad(id_ciudad)
     revisar_estado_producto(estado)
     if estado == 'A':
-        sucursales = Sucursal.objects.filter(estado=True)
+        sucursales = Sucursal.objects.filter(ciudad__id=id_ciudad,estado=True)
     elif estado == 'I':
-        sucursales = Sucursal.objects.filter(estado=False)
+        sucursales = Sucursal.objects.filter(ciudad__id=id_ciudad,estado=False)
     else:
-        sucursales = Sucursal.objects.all()
+        sucursales = Sucursal.objects.filter(ciudad__id=id_ciudad)
     
     data = SucursalSerializer(sucursales, many=True).data
     return Response(data)
@@ -862,7 +863,7 @@ def aceptar_pedido(request,id_pedido):
 def get_pedidos_for_repartidor(request):
     # usuario = get_user_by_token(request)
     # los pedidos se haran por dia laboral
-    hora_actual = make_aware(datetime.datetime.now())
+    hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
     hora_fin = hora_actual
     pedidos = Pedido.objects.filter(estado='E',repartidor=None,fecha__gte=hora_inicio,fecha__lte=hora_fin)
@@ -878,7 +879,7 @@ def get_pedidos_by_repartidor_dia(request,estado):
     usuario = get_user_by_token(request)
     # los pedidos se haran por dia laboral
     estado = revisar_estado_pedido_repartidor(estado)
-    hora_actual = make_aware(datetime.datetime.now())
+    hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
     hora_fin = hora_actual
     pedidos = Pedido.objects.filter(estado=estado,repartidor__id=usuario.id,fecha__gte=hora_inicio,fecha__lte=hora_fin)
@@ -895,10 +896,29 @@ def get_pedidos_by_repartidor_semana(request,estado):
     usuario = get_user_by_token(request)
     # los pedidos se haran por dia laboral
     estado = revisar_estado_pedido_repartidor(estado)
-    hora_actual = make_aware(datetime.datetime.now())
+    hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
     hora_fin = hora_actual
     pedidos = Pedido.objects.filter(estado=estado,repartidor__id=usuario.id,fecha__gte=hora_inicio-timedelta(days=7),fecha__lte=hora_fin)
+    data = PedidosSucursalCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+
+# obtener pedidos por repartidor rango de fechas
+@swagger_auto_schema(method="GET",request_body=PedidosRangoFecha_Sucursal,responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Repartidor (RANGO DE FECHAS)",
+    operation_description='Devuelve la lista de pedidos de los ultmos 7 dias por repartidor segun el estado:\n\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_by_repartidor_rango(request,estado):
+    usuario = get_user_by_token(request)
+    fechas = PedidosRangoFecha_Sucursal(data=request.data)
+    fechas.is_valid(raise_exception=True)
+    # los pedidos se haran por dia laboral
+    estado = revisar_estado_pedido_repartidor(estado)
+    min_date = make_aware(datetime.combine(fechas.validated_data['fecha_inicio'], time.min))
+    max_date = make_aware(datetime.combine(fechas.validated_data['fecha_fin'], time.max))
+
+    pedidos = Pedido.objects.filter(estado=estado,repartidor__id=usuario.id,fecha__gte=min_date,fecha__lte=max_date)
     data = PedidosSucursalCustomSerializer(pedidos, many=True).data
     return Response(data)
 
@@ -906,7 +926,7 @@ def get_pedidos_by_repartidor_semana(request,estado):
 
 
 # obtener pedidos por sucursal
-@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos by Sucursal (del dia), estado(A,E,F)")
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos by Sucursal (DIA), estado(A,E,F)")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_by_sucursal(request, id_sucursal, estado):
@@ -915,10 +935,53 @@ def get_pedidos_by_sucursal(request, id_sucursal, estado):
     estado = revisar_estado_pedido(estado)
     revisar_propietario_sucursal(usuario, sucursal)
     # los pedidos se haran por dia laboral
-    hora_actual = make_aware(datetime.datetime.now())
+    hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
     hora_fin = hora_actual
     pedidos = Pedido.objects.filter(sucursal=sucursal, estado=estado,fecha__gte=hora_inicio,fecha__lte=hora_fin)
+    data = PedidosSucursalCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+
+# obtener pedidos por sucursal semana
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Sucursal (ULTIMOS 7 DIAS)",
+    operation_description='Devuelve la lista de pedidos de los ultmos 7 dias por sucursal segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_by_sucursal_semana(request,estado):
+    usuario = get_user_by_token(request)
+    # los pedidos se haran por dia laboral
+    sucursal = revisar_sucursal(id_sucursal)
+    estado = revisar_estado_pedido(estado)
+    revisar_propietario_sucursal(usuario, sucursal)
+
+    hora_actual = make_aware(datetime.now())
+    hora_inicio = get_hora_apertura(hora_actual)
+    hora_fin = hora_actual
+    pedidos = Pedido.objects.filter(sucursal__id=sucursal.id,estado=estado,fecha__gte=hora_inicio-timedelta(days=7),fecha__lte=hora_fin)
+    data = PedidosSucursalCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+
+
+# obtener pedidos por sucursal rango de fechas
+@swagger_auto_schema(method="GET",request_body=PedidosRangoFecha_Sucursal,responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Sucursal (RANGO DE FECHAS)",
+    operation_description='Devuelve la lista de pedidos en el rango de fechas segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_by_sucursal_rango(request,id_sucursal, estado):
+    usuario = get_user_by_token(request)
+    sucursal = revisar_sucursal(id_sucursal)
+    estado = revisar_estado_pedido(estado)
+    revisar_propietario_sucursal(usuario, sucursal)
+
+    fechas = PedidosRangoFecha_Sucursal(data=request.data)
+    fechas.is_valid(raise_exception=True)
+    # los pedidos se haran por dia laboral
+    min_date = make_aware(datetime.combine(fechas.validated_data['fecha_inicio'], time.min))
+    max_date = make_aware(datetime.combine(fechas.validated_data['fecha_fin'], time.max))
+
+    pedidos = Pedido.objects.filter(sucursal__id=sucursal.id, estado=estado,fecha__gte=min_date,fecha__lte=max_date)
     data = PedidosSucursalCustomSerializer(pedidos, many=True).data
     return Response(data)
 
@@ -933,7 +996,7 @@ def get_pedidos_by_empresa(request, id_empresa, estado):
     estado = revisar_estado_pedido(estado)
     revisar_propietario_empresa(usuario, empresa)
     # los pedidos se haran por dia laboral
-    hora_actual = make_aware(datetime.datetime.now())
+    hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
     hora_fin = hora_actual
     
@@ -991,8 +1054,9 @@ def cambiar_pedido_en_finalizado_cliente(request, id_pedido):
     return Response({'mensaje':'El pedido ha sido finalizado'})
 
 # a los pedidos para el cliente no lo envio el objeto completo de cliente(solo su id).. solo a las empresa se les envia completo el cliente
-# obtener pedidos activos por cliente
-@swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos por estado, cliente")
+# obtener pedidos por cliente dia
+@swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos por Cliente (DIA)",
+    operation_description='Devuelve la lista de pedidos del dia por cliente segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_by_estado_cliente(request, estado):
@@ -1000,13 +1064,57 @@ def get_pedidos_by_estado_cliente(request, estado):
     if not is_member(usuario,'cliente'):
         return Response({'error':'No esta autorizado'})
     estado = revisar_estado_pedido(estado)
-    pedidos = Pedido.objects.filter(cliente__id=usuario.id, estado=estado)
+
+    hora_actual = make_aware(datetime.now())
+    hora_inicio = get_hora_apertura(hora_actual)
+    hora_fin = hora_actual
+    pedidos = Pedido.objects.filter(cliente__id=usuario.id,estado=estado,fecha__gte=hora_inicio,fecha__lte=hora_fin)
     data = PedidosCustomSerializer(pedidos, many=True).data
     return Response(data)
 
 
+# obtener pedidos por cliente semana
+@swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos por Cliente (ULTIMOS 7 DIAS)",
+    operation_description='Devuelve la lista de pedidos de la semana por cliente segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_by_estado_cliente_semana(request, estado):
+    usuario = get_user_by_token(request)
+    if not is_member(usuario,'cliente'):
+        return Response({'error':'No esta autorizado'})
+    estado = revisar_estado_pedido(estado)
+
+    hora_actual = make_aware(datetime.now())
+    hora_inicio = get_hora_apertura(hora_actual)
+    hora_fin = hora_actual
+    pedidos = Pedido.objects.filter(cliente__id=usuario.id,estado=estado,fecha__gte=hora_inicio-timedelta(days=7),fecha__lte=hora_fin)
+    data = PedidosCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+
+# obtener pedidos por cliente rango
+@swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos por Cliente (RANGO DE FECHAS)",
+    operation_description='Devuelve la lista de pedidos de acuerdo al rango de fechas por cliente segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def get_pedidos_by_estado_cliente_rango(request, estado):
+    usuario = get_user_by_token(request)
+    if not is_member(usuario,'cliente'):
+        return Response({'error':'No esta autorizado'})
+    estado = revisar_estado_pedido(estado)
+    fechas = PedidosRangoFecha_Sucursal(data=request.data)
+    fechas.is_valid(raise_exception=True)
+
+    min_date = make_aware(datetime.combine(fechas.validated_data['fecha_inicio'], time.min))
+    max_date = make_aware(datetime.combine(fechas.validated_data['fecha_fin'], time.max))
+    pedidos = Pedido.objects.filter(cliente__id=usuario.id,estado=estado,fecha__gte=min_date,fecha__lte=max_date)
+    data = PedidosCustomSerializer(pedidos, many=True).data
+    return Response(data)
+
+
+
 # a los pedidos para el cliente no lo envio el objeto completo de cliente(solo su id).. solo a las empresa se les envia completo el cliente
-# obtener pedidos activos por cliente
+# obtener pedidos activos por cliente comentado
 @swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos Activo y en Cursp by Cliente-Token")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
@@ -1022,7 +1130,7 @@ def get_pedidos_activos_by_cliente(request):
     return Response(data)
 
 
-# obtener pedidos finalizados por cliente
+# obtener pedidos finalizados por cliente comentado
 @swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos Finalizados by Cliente-Token")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
@@ -1401,6 +1509,13 @@ def revisar_sucursales_by_empresa(empresa):
         return sucursales
     except:
         raise NotFound('No se encontro a la sucursal','sucursales_not_found')
+    
+def revisar_ciudad(id_ciudad):
+    try:
+        ciudad = Ciudad.objects.get(pk=id_ciudad)
+        return ciudad
+    except:
+        raise NotFound('No se encontro la ciudad')
 
 # class AddImage (generics.CreateAPIView):
 #     permission_classes = (AllowAny,)

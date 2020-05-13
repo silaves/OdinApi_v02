@@ -301,7 +301,7 @@ def editar_usuario(request):
     else:
         perfil = Perfil.objects.get(usuario=usuario)
     obj_perfil = PerfilNormalSerializer(perfil,data=request.data)
-    print(obj_perfil)
+    
     obj.is_valid(raise_exception=True)
     obj_perfil.is_valid(raise_exception=True)
     obj.save()

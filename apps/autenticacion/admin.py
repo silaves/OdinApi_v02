@@ -22,7 +22,7 @@ class CustomUserAdmin(UserAdmin):
     list_display = ('id','username', 'nombres', 'apellidos', 'is_staff', 'is_active', 'get_groups', 'last_login')
     list_filter = ('username', 'is_staff', 'is_active', 'groups')
     fieldsets = (
-        ('Informacion Personal', {'fields': ('username', 'password', 'nombres', 'apellidos','email','foto')}),
+        ('Informacion Personal', {'fields': ('username', 'password', 'nombres', 'apellidos','email','foto','ciudad')}),
         ('Permisos', {'fields': ('is_staff', 'is_active','groups', 'user_permissions')}),
     )
     add_fieldsets =(        

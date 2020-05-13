@@ -1,11 +1,12 @@
+from datetime import date
 from decimal import Decimal
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from apps.autenticacion.models import Usuario
+from apps.autenticacion.models import Usuario, Ciudad
 from .models import Empresa, Sucursal, Combo, ProductoFinal, CategoriaEmpresa, Pedido, PedidoProductoFinal
-from apps.autenticacion.serializers import PerfilSerializer
+from apps.autenticacion.serializers import PerfilSerializer, VerCiudad_Serializer
 
 class CategoriaEmpresaSerializer(serializers.ModelSerializer):
     class Meta:
@@ -52,19 +53,27 @@ class EmpresaEditarSerializer(serializers.ModelSerializer):
         return value
 
 
-class SucursalSerializer(serializers.ModelSerializer):
-    empresa = EmpresaSerializer()
+class CrearSucursal_Serializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sucursal
-        fields = ['id','nombre','disponible','estado','telefono','ubicacion','direccion','foto','empresa','hora_inicio','hora_fin']
+        fields = ['id','nombre','disponible','estado','telefono','ubicacion','direccion','foto','empresa','hora_inicio','hora_fin','ciudad']
+
+
+class SucursalSerializer(serializers.ModelSerializer):
+    empresa = EmpresaSerializer()
+    ciudad = VerCiudad_Serializer()
+
+    class Meta:
+        model = Sucursal
+        fields = ['id','nombre','disponible','estado','telefono','ubicacion','direccion','foto','empresa','hora_inicio','hora_fin','ciudad']
     
 
 
 class SucursalEditarSerializer(serializers.ModelSerializer):
     class Meta:
         model = Sucursal
-        fields = ['nombre','telefono','ubicacion','direccion','foto','hora_inicio','hora_fin','estado']
+        fields = ['nombre','telefono','ubicacion','direccion','foto','hora_inicio','hora_fin','estado','ciudad']
 
 
 class ProductoFinalSerializer(serializers.ModelSerializer):
@@ -406,7 +415,7 @@ class PedidoSucursalSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Sucursal
-        fields = ['id','nombre','disponible','estado','telefono','ubicacion','direccion','foto','empresa','hora_inicio','hora_fin']
+        fields = ['id','nombre','disponible','estado','telefono','ubicacion','direccion','foto','empresa','hora_inicio','hora_fin','ciudad']
         
 class PedidosSucursalCustomSerializer(serializers.ModelSerializer):
     cliente = PerfilSerializer()
@@ -423,6 +432,20 @@ class PedidosSucursalCustomSerializer(serializers.ModelSerializer):
             return ProFinalSucursalSerializer(productos, many=True).data
 
 
+# pedidor rango de fechas
+
+class PedidosRangoFecha_Sucursal(serializers.Serializer):
+    fecha_inicio = serializers.DateField(format=settings.DATE_FORMAT,required=True)
+    fecha_fin = serializers.DateField(format=settings.DATE_FORMAT,required=True)
+
+    def validate(self, data):
+        f1 = data['fecha_inicio']
+        f2 = data['fecha_fin']
+        if f1 > f2:
+            raise serializers.ValidationError('La fecha_inicio no puede ser mayor a la fecha_fin')
+        elif f1 > date.today():
+            raise serializers.ValidationError('La fecha_inicio esta fuera del rango')
+        return data
 
 # serializadores para la documentacion.. no influyen en el logica del sistema.
 

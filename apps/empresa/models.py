@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from apps.autenticacion.models import Usuario
+from apps.autenticacion.models import Usuario, Ciudad
 from .validators import *
 # Create your models here.
 
@@ -17,6 +17,7 @@ class CategoriaEmpresa(models.Model):
     
     def __str__(self):
         return self.nombre
+
 
 
 class Empresa(models.Model):
@@ -51,6 +52,7 @@ class Sucursal(models.Model):
                              help_text='El tamaño maximo para las fotos es %s Megas' % settings.MAXIMO_TAM_ARCHIVOS
                              )
     empresa = models.ForeignKey(Empresa, on_delete=models.PROTECT)
+    ciudad = models.ForeignKey(Ciudad,blank=True,null=True, on_delete=models.PROTECT)
 
     class Meta:
         db_table = 'SUCURSAL'
