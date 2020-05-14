@@ -231,7 +231,7 @@ def cambiar_diponible_sucursal(request, id_sucursal):
 
 
 # lista de ciudades
-@swagger_auto_schema(method="GET",responses={200:PerfilSerializer(many=True)},operation_id="Lista Ciudades")
+@swagger_auto_schema(method="GET",responses={200:VerCiudad_Serializer(many=True)},operation_id="Lista Ciudades")
 @api_view(['GET'])
 @permission_classes([IsAuthenticated,])
 def lista_ciudades(request, estado):
