@@ -39,7 +39,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/auth/', include('apps.autenticacion.urls')),
     path('api/', include('apps.empresa.urls')),
-    path('api/articulo/', include('apps.articulos.urls')),
+    # path('api/articulo/', include('apps.articulos.urls')),
     path('api/', include('apps.taxis.urls')),
     
     # path('swagger(?P<format>\.json|\.yaml)', schema_view.without_ui(cache_timeout=0), name='schema-json'),

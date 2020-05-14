@@ -48,7 +48,7 @@ INSTALLED_APPS = [
     'apps.core',
     'apps.empresa',
     'apps.taxis',
-    'apps.articulos',
+    # 'apps.articulos',
     'drf_yasg',
 ]
 
