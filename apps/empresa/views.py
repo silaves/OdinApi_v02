@@ -905,8 +905,9 @@ def get_pedidos_by_repartidor_semana(request,estado):
 
 
 # obtener pedidos por repartidor rango de fechas
-@swagger_auto_schema(method="GET",request_body=PedidosRangoFecha_Sucursal,responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Repartidor (RANGO DE FECHAS)",
-    operation_description='Devuelve la lista de pedidos de los ultmos 7 dias por repartidor segun el estado:\n\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Repartidor (RANGO DE FECHAS)",
+    operation_description='Devuelve la lista de pedidos de los ultmos 7 dias por repartidor segun el estado:\n\n\tE = en curso\n\tF = finalizados\n\tC = cancelados'
+        '\nrequest_body:\n\n\t{\n\t\t"fecha_inicio":"YY-MM-DD",\n\t\t"fecha_fin":"YY-MM-DD"\n\t}')
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_by_repartidor_rango(request,estado):
@@ -965,8 +966,9 @@ def get_pedidos_by_sucursal_semana(request,estado):
 
 
 # obtener pedidos por sucursal rango de fechas
-@swagger_auto_schema(method="GET",request_body=PedidosRangoFecha_Sucursal,responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Sucursal (RANGO DE FECHAS)",
-    operation_description='Devuelve la lista de pedidos en el rango de fechas segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+@swagger_auto_schema(method="GET",responses={200:PedidosSucursalCustomSerializer(many=True)},operation_id="Lista de Pedidos por Sucursal (RANGO DE FECHAS)",
+    operation_description='Devuelve la lista de pedidos en el rango de fechas segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados'
+        '\nrequest_body:\n\n\t{\n\t\t"fecha_inicio":"YY-MM-DD",\n\t\t"fecha_fin":"YY-MM-DD"\n\t}')
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_by_sucursal_rango(request,id_sucursal, estado):
@@ -1094,7 +1096,8 @@ def get_pedidos_by_estado_cliente_semana(request, estado):
 
 # obtener pedidos por cliente rango
 @swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos por Cliente (RANGO DE FECHAS)",
-    operation_description='Devuelve la lista de pedidos de acuerdo al rango de fechas por cliente segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
+    operation_description='Devuelve la lista de pedidos de acuerdo al rango de fechas por cliente segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados'
+        '\nrequest_body:\n\n\t{\n\t\t"fecha_inicio":"YY-MM-DD",\n\t\t"fecha_fin":"YY-MM-DD"\n\t}')
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_by_estado_cliente_rango(request, estado):
@@ -1115,7 +1118,7 @@ def get_pedidos_by_estado_cliente_rango(request, estado):
 
 # a los pedidos para el cliente no lo envio el objeto completo de cliente(solo su id).. solo a las empresa se les envia completo el cliente
 # obtener pedidos activos por cliente comentado
-@swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos Activo y en Cursp by Cliente-Token")
+# @swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos Activo y en Cursp by Cliente-Token")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_activos_by_cliente(request):
@@ -1131,7 +1134,7 @@ def get_pedidos_activos_by_cliente(request):
 
 
 # obtener pedidos finalizados por cliente comentado
-@swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos Finalizados by Cliente-Token")
+# @swagger_auto_schema(method="GET",responses={200:PedidosCustomSerializer(many=True)},operation_id="Lista de Pedidos Finalizados by Cliente-Token")
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_finalizados_by_cliente(request):
