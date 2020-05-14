@@ -34,6 +34,7 @@ from .serializers import (EmpresaSerializer, EmpresaEditarSerializer, SucursalSe
     ProductoFinalVerSerializer, ps,PedidosCustomSerializer,PedidosSucursalCustomSerializer, ProFinalSucursalSerializer,
     CategoriaEmpresaSerializer,ResponseCombo,SucursalEditarSerializer,ResponseComboEditar,ResponseProducto,ResponseProductodID,
     ResponsePedidos,ResponsePedidosEditar,CrearPedidoSerializer,EditarPedidoSerializer,ResponseTokenFirebase,PedidosRangoFecha_Sucursal,
+    VerCiudad_Serializer,
     # crear combos
     CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer,CrearSucursal_Serializer)
 from apps.autenticacion.serializers import UsuarioSerializer,PerfilSerializer
@@ -226,6 +227,24 @@ def cambiar_diponible_sucursal(request, id_sucursal):
     except:
         mensaje = 'No se detecto ningun cambio'
     return Response({'mensaje':mensaje})
+
+
+
+# lista de ciudades
+@swagger_auto_schema(method="GET",responses={200:PerfilSerializer(many=True)},operation_id="Lista Ciudades")
+@api_view(['GET'])
+@permission_classes([IsAuthenticated,])
+def lista_ciudades(request, estado):
+    revisar_estado_AIT(estado)
+    if estado == 'A':
+        ciudades = Ciudad.objects.filter(estado=True)
+    elif estado == 'I':
+        ciudades = Ciudad.objects.filter(estado=False)
+    else:
+        ciudades = Ciudad.objects.all()
+    data = VerCiudad_Serializer(ciudades, many=True).data
+    return Response(data)
+
 
 
 # PRODUCTO
@@ -1507,6 +1526,11 @@ def revisar_estado_pedido_repartidor(estado):
 def revisar_estado_producto(estado):
     if not(estado == 'A' or estado == 'I' or estado == 'T'):
         raise NotFound('No existe la ruta','empresa not found')
+    return estado
+
+def revisar_estado_AIT(estado):
+    if not (estado == 'A' or estado == 'I' or estado == 'T'):
+        raise NotFound('No se encontro la ruta')
     return estado
 
 def revisar_propietario_sucursal(usuario, sucursal):

@@ -7,6 +7,8 @@ urlpatterns = [
     path('empresa/<int:id_empresa>/editar/', views.editar_empresa, name='Modificar Empresa'),
     path('empresa/usuario/', views.getEmpresaByUsuario, name='Lista Empresas por Usuario'),
     path('empresa/lista/', views.get_empresas, name='Lista todas las Empresas'),
+
+    path('empresa/ciudad/<str:estado>/lista/', views.lista_ciudades, name='Lista de Ciudades'),
     # SUCURSAL
     path('empresa/sucursal/crear/', views.crearSucursal, name='Crear Sucursal'),
     path('empresa/sucursal/<int:id_sucursal>/editar/', views.editar_sucursal, name='Modificar Sucursal'),
@@ -14,6 +16,7 @@ urlpatterns = [
     path('empresa/<int:id_empresa>/sucursal/<str:estado>/lista/', views.getSucursales, name='Lista de Sucursales por Empresa'),
     path('empresa/sucursal/<int:id_sucursal>/', views.getSucursal, name='Obtener Sucursal'),
     path('empresa/sucursal/<int:id_sucursal>/disponible/', views.cambiar_diponible_sucursal, name='Cambiar Disponibilidad Sucursal'),
+    
 
     path('empresa/sucursal/<int:id_sucursal>/token_firebase/',views.get_token_firebase, name='Obtener Toke Firebase'),
     # PRODUCTO

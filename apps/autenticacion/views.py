@@ -478,6 +478,8 @@ def crear_empresario(request):
     return Response({'mensaje':'Se ha creado el empresario correctamente'})
 
 
+
+
 # funcion para otener el usuario de acuerdo al token del request
 def get_user_by_token(request):
     token = request.META.get('HTTP_AUTHORIZATION')
@@ -488,3 +490,5 @@ def get_user_by_token(request):
 # verificar si un usuario pertence a un grupo
 def is_member(user, group_name):
     return user.groups.filter(name=group_name).exists()
+
+
