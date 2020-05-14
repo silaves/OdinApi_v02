@@ -861,12 +861,14 @@ def aceptar_pedido(request,id_pedido):
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
 def get_pedidos_for_repartidor(request):
-    # usuario = get_user_by_token(request)
+    usuario = get_user_by_token(request)
+    if not is_member(usuario,'repartidor'):
+        return Response({'error':'No esta autorizado'})
     # los pedidos se haran por dia laboral
     hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
     hora_fin = hora_actual
-    pedidos = Pedido.objects.filter(estado='E',repartidor=None,fecha__gte=hora_inicio,fecha__lte=hora_fin)
+    pedidos = Pedido.objects.filter(sucursal__ciudad__id=usuario.ciudad.id,estado='E',repartidor=None,fecha__gte=hora_inicio,fecha__lte=hora_fin)
     data = PedidosSucursalCustomSerializer(pedidos, many=True).data
     return Response(data)
 
