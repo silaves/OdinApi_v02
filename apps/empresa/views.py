@@ -36,7 +36,7 @@ from .serializers import (EmpresaSerializer, EmpresaEditarSerializer, SucursalSe
     ResponsePedidos,ResponsePedidosEditar,CrearPedidoSerializer,EditarPedidoSerializer,ResponseTokenFirebase,PedidosRangoFecha_Sucursal,
     # crear combos
     CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer,CrearSucursal_Serializer)
-from apps.autenticacion.serializers import UsuarioSerializer
+from apps.autenticacion.serializers import UsuarioSerializer,PerfilSerializer
 from apps.autenticacion.models import Usuario, Ciudad
 from apps.autenticacion.views import get_user_by_token, is_member
 
@@ -833,6 +833,17 @@ def cambiar_pedido_en_cancelado(request, id_pedido):
     return Response({'mensaje':'El pedido ha sido cancelado'})
 
 # repartidor
+
+# lista de repartidor por ciudad
+@swagger_auto_schema(method="GET",responses={200:PerfilSerializer(many=True)},operation_id="Lista de Repartidores por Ciudad")
+@api_view(['GET'])
+@permission_classes((IsAuthenticated,))
+def repartidores_by_ciudad(request, id_ciudad):
+    # los pedidos se haran por dia laboral
+    usuarios = Usuario.objects.filter(groups__name='repartidor',ciudad__id=id_ciudad)
+    data = PerfilSerializer(usuarios, many=True).data
+    return Response(data)
+
 
 # tomar pedido
 @swagger_auto_schema(method="POST",responses={200:'asd'},operation_id="Repartidor - Aceptar Pedido",
