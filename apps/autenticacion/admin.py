@@ -1,12 +1,13 @@
 from django.contrib import admin
-
+from django import forms
 # Register your models here.
+from django.contrib.admin.widgets import AdminTimeWidget
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import Group, Permission
 from django.db.models.sql.datastructures import Join
 
 from .forms import CustomUserCreationForm, CustomUserChangeForm, GroupForm
-from .models import Usuario, Perfil
+from .models import Usuario, Perfil, Horario
 
 
 class PerfilInline(admin.StackedInline):
@@ -14,6 +15,31 @@ class PerfilInline(admin.StackedInline):
     fields = ('telefono', 'calificacion','disponibilidad' )
     readonly_fields = ('calificacion',)
     can_delete = False
+
+class HorarioForm(forms.ModelForm):
+    entrada = forms.TimeField(widget=AdminTimeWidget(format='%H:%M'))
+
+    class Meta:
+        model = Horario
+        fields = '__all__'
+    
+    def clean(self):
+        entrada = self.cleaned_data.get('entrada')
+        salida = self.cleaned_data.get('salida')
+        if entrada and salida:
+            if entrada > salida:
+                raise forms.ValidationError({'entrada':['El horario de entrada no puede ser mayor al de salida']})
+            elif entrada == salida:
+                raise forms.ValidationError({'entrada':['El horario de entrada no puede ser igual al de salida']})
+        return self.cleaned_data
+
+
+class HorarioInline(admin.StackedInline):
+    model = Horario
+    form = HorarioForm
+    fields = ('entrada', 'salida','estado' )
+    can_delete = False
+    extra = 1
 
 class CustomUserAdmin(UserAdmin):
     add_form = CustomUserCreationForm
@@ -31,7 +57,7 @@ class CustomUserAdmin(UserAdmin):
             'fields': ('username', 'password1', 'password2', 'nombres',  'apellidos', 'foto','email', 'is_staff', 'is_active')}
         ),
     )
-    inlines = (PerfilInline, )
+    inlines = (PerfilInline, HorarioInline,)
     search_fields = ('username',)
     ordering = ('username',)
     actions = ["activar_usuario"]

@@ -58,6 +58,7 @@ urlpatterns = [
     path('empresa/pedido/disponibles/dia/', views.get_pedidos_for_repartidor, name='Lista de Pedidos de todas las Sucursales - Repartidor'),
     path('empresa/repartidor/ciudad/<int:id_ciudad>/', views.repartidores_by_ciudad, name='Lista de Repartidores por Ciudad'),
     path('empresa/repartidor/pedido/<int:id_pedido>/aceptar/', views.aceptar_pedido, name='Aceptar Pedido'),
+    path('empresa/repartidor/disponible/', views.cambiar_disponibilidad_repartidor, name='Cambiar disponibilidad Repartidor'),
     path('empresa/repartidor/pedido/<str:estado>/dia/', views.get_pedidos_by_repartidor_dia, name='Lista de Pedidos de un Repartidor (DIA)'),
     path('empresa/repartidor/pedido/<str:estado>/semana/', views.get_pedidos_by_repartidor_semana, name='Lista de Pedidos de un Repartidor (SEMANA)'),
     path('empresa/repartidor/pedido/<str:estado>/rango/', views.get_pedidos_by_repartidor_rango, name='Lista de Pedidos de un Repartidor (RANGO DE FECHAS)'),

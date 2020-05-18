@@ -4,7 +4,7 @@ from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from rest_framework import serializers
 
-from apps.autenticacion.models import Usuario, Ciudad
+from apps.autenticacion.models import Usuario, Ciudad, Horario
 from .models import Empresa, Sucursal, Combo, ProductoFinal, CategoriaEmpresa, Pedido, PedidoProductoFinal
 from apps.autenticacion.serializers import PerfilSerializer, VerCiudad_Serializer
 
@@ -581,3 +581,16 @@ class CambiarDisponibleSucursal_Serializer(serializers.ModelSerializer):
     class Meta:
         model = Sucursal
         fields = ['disponible']
+
+
+# repartidor
+
+# agregar horario
+class AgregarHorario_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Horario
+        fields = ['entrada','salida']
+
+
+class RepartidorDisponible_Serializer(serializers.Serializer):
+    disponible = serializers.ChoiceField(required=True,choices=(('L','Libre'),('N', 'No Disponible')))

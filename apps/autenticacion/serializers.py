@@ -3,7 +3,7 @@ from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
 from drf_yasg.utils import swagger_serializer_method
 
-from .models import Usuario, Perfil, Ciudad
+from .models import Usuario, Perfil, Ciudad, Horario
 
 # registrar nuevo usuario
 class RegistrarseSerializer(serializers.ModelSerializer):
@@ -191,16 +191,22 @@ class VerCiudad_Serializer(serializers.ModelSerializer):
         model = Ciudad
         fields = ['id','nombre','estado']
 
+class VerHorario_Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = Horario
+        fields = ['entrada','salida','estado']
+
 
 class PerfilSerializer(serializers.ModelSerializer):
     telefono = serializers.SerializerMethodField('getTelefono')
     calificacion = serializers.SerializerMethodField('getCalificacion')
     disponibilidad = serializers.SerializerMethodField('getDisponibilidad')
     ciudad = VerCiudad_Serializer()
+    horario = serializers.SerializerMethodField()
 
     class Meta:
         model = Usuario
-        fields = ('id','username','email','nombres','apellidos','token_firebase','foto','ciudad','perfil','telefono','calificacion','disponibilidad','grupos')
+        fields = ('id','username','email','nombres','apellidos','token_firebase','foto','ciudad','perfil','telefono','calificacion','disponibilidad','grupos','horario')
     
     def getTelefono(self, usuario):
         try:
@@ -222,6 +228,13 @@ class PerfilSerializer(serializers.ModelSerializer):
         except:
             disponibilidad = 0
         return disponibilidad
+    
+    def get_horario(self, obj):
+        horarios = Horario.objects.filter(usuario__id=obj.id)
+        return VerHorario_Serializer(horarios, many=True).data
+    
+
+
       
 
 # perfil edtiar

@@ -107,3 +107,17 @@ class Perfil(models.Model):
 
     def __str__(self):
         return '%s' % (self.usuario)
+
+class Horario(models.Model):
+    entrada = models.TimeField(blank=False)
+    salida = models.TimeField(blank=False)
+    estado = models.BooleanField(default=True, blank=True)
+    usuario = models.ForeignKey(Usuario, on_delete=models.PROTECT)
+
+    class Meta:
+        db_table = 'HORARIO'
+        verbose_name = _('horario')
+        verbose_name_plural = _('horarios')
+
+    # def __str__(self):
+    #     return self.id

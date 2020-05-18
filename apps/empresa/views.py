@@ -34,11 +34,12 @@ from .serializers import (EmpresaSerializer, EmpresaEditarSerializer, SucursalSe
     ProductoFinalVerSerializer, ps,PedidosCustomSerializer,PedidosSucursalCustomSerializer, ProFinalSucursalSerializer,
     CategoriaEmpresaSerializer,ResponseCombo,SucursalEditarSerializer,ResponseComboEditar,ResponseProducto,ResponseProductodID,
     ResponsePedidos,ResponsePedidosEditar,CrearPedidoSerializer,EditarPedidoSerializer,ResponseTokenFirebase,PedidosRangoFecha_Sucursal,
-    VerCiudad_Serializer,
+    VerCiudad_Serializer,RepartidorDisponible_Serializer,
     # crear combos
-    CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer,CrearSucursal_Serializer)
+    CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer,CrearSucursal_Serializer,
+    AgregarHorario_Serializer)
 from apps.autenticacion.serializers import UsuarioSerializer,PerfilSerializer
-from apps.autenticacion.models import Usuario, Ciudad
+from apps.autenticacion.models import Usuario, Ciudad, Perfil, Horario
 from apps.autenticacion.views import get_user_by_token, is_member
 
 # # lista de usuarios
@@ -853,6 +854,10 @@ def cambiar_pedido_en_cancelado(request, id_pedido):
 
 # repartidor
 
+# agregar horario
+# @swagger_auto_schema(method="GET",responses={200:PerfilSerializer(many=True)},operation_id="Agregar horario a repartidor")
+
+
 # lista de repartidor por ciudad
 @swagger_auto_schema(method="GET",responses={200:PerfilSerializer(many=True)},operation_id="Lista de Repartidores por Ciudad")
 @api_view(['GET'])
@@ -862,6 +867,25 @@ def repartidores_by_ciudad(request, id_ciudad):
     usuarios = Usuario.objects.filter(groups__name='repartidor',ciudad__id=id_ciudad)
     data = PerfilSerializer(usuarios, many=True).data
     return Response(data)
+
+
+# cambiar disponibilidad repartidor
+@swagger_auto_schema(method="POST",responses={200:'Se ha modificado la disponibilidad'},operation_id="Cambiar Disponibilidad del Repartidor",
+    operation_description='Cambia la disponibilidad del repartidor en disponible(L) o no disponible(N).request_body:\n\n\t{\n\t\t"disponible" : "L"\n\t}')
+@api_view(['POST'])
+@permission_classes([IsAuthenticated,])
+def cambiar_disponibilidad_repartidor(request):
+    usuario = get_user_by_token(request)
+    obj = RepartidorDisponible_Serializer(data=request.data)
+    obj.is_valid(raise_exception=True)
+    mensaje = ''
+    if obj.validated_data['disponible'] == 'L':
+        Perfil.objects.filter(usuario__id=usuario.id).update(disponibilidad='L')
+        mensaje = 'El repartidor ahora esta disponible.'
+    else:
+        Perfil.objects.filter(usuario__id=usuario.id).update(disponibilidad='N')
+        mensaje = 'El repartidor ahora no esta disponible.'
+    return Response({'mensaje':mensaje})
 
 
 # tomar pedido
@@ -874,6 +898,7 @@ def aceptar_pedido(request,id_pedido):
     if not is_member(usuario,'repartidor'):
         return Response({'error':'No esta autorizado'})
     pedido = revisar_pedido(id_pedido)
+    validar_repartidor_activo(usuario)
     if pedido.estado == 'E':
         if pedido.repartidor is None:
             pedido.repartidor = usuario
@@ -894,6 +919,8 @@ def get_pedidos_for_repartidor(request):
     usuario = get_user_by_token(request)
     if not is_member(usuario,'repartidor'):
         return Response({'error':'No esta autorizado'})
+    # validar que el usuario este disponible y que tenga horarios validos
+    validar_repartidor_activo(usuario)
     # los pedidos se haran por dia laboral
     hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
@@ -1556,6 +1583,20 @@ def revisar_ciudad(id_ciudad):
         return ciudad
     except:
         raise NotFound('No se encontro la ciudad')
+
+def validar_repartidor_activo(usuario):
+    if usuario.is_active is False:
+        raise PermissionDenied('El usuario se encuentra de baja en el sistema')
+    try:
+        perfil = Perfil.objects.get(usuario__id=usuario.id)
+    except:
+        raise PermissionDenied('El usuario no tiene el perfil activo')
+    if perfil.disponibilidad != 'L':
+        raise PermissionDenied('El usuario no esta disponible')
+    ini = datetime.now().time()
+    if Horario.objects.filter(entrada__lte=ini,salida__gte=ini,estado=True).exists() is False:
+        raise PermissionDenied('El usuario no esta en horario de trabajo')
+    return True
 
 # class AddImage (generics.CreateAPIView):
 #     permission_classes = (AllowAny,)
