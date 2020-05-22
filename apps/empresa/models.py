@@ -39,7 +39,7 @@ class Empresa(models.Model):
 class Sucursal(models.Model):
     nombre = models.CharField(_('Zona'),max_length=20)
     telefono = models.IntegerField()
-    ubicacion = models.CharField(max_length=50, blank=True, null=True)
+    ubicacion = models.CharField(max_length=255, blank=True, null=True)
     direccion = models.CharField(max_length=255)
     hora_inicio = models.TimeField(default='15:00:00',blank=True)
     hora_fin = models.TimeField(default='15:00:00',blank=True)
@@ -110,7 +110,7 @@ class Pedido(models.Model):
     estado = models.CharField(max_length=1, default='N',choices=(
 		('A','Activo'),('E', 'En Curso'),('F', 'Finalizado'),('C', 'Cancelado')
 	))
-    ubicacion = models.CharField(_('Direccion'), max_length=50, blank=True, null=True)
+    ubicacion = models.CharField(_('Direccion'), max_length=255, blank=True, null=True)
     sucursal = models.ForeignKey(Sucursal, on_delete=models.PROTECT)
     repartidor = models.ForeignKey(Usuario,blank=True,null=True,related_name='repartidor', on_delete=models.CASCADE)
 

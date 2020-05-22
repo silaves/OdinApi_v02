@@ -1,6 +1,9 @@
-from datetime import date, datetime, time
+from typing import Dict, Any
 import json
 import jwt
+import time as ti
+import timeit
+from datetime import date, datetime, time
 from drf_yasg.utils import swagger_auto_schema
 from urllib.error import HTTPError
 from datetime import timedelta
@@ -41,6 +44,8 @@ from .serializers import (EmpresaSerializer, EmpresaEditarSerializer, SucursalSe
 from apps.autenticacion.serializers import UsuarioSerializer,PerfilSerializer
 from apps.autenticacion.models import Usuario, Ciudad, Perfil, Horario
 from apps.autenticacion.views import get_user_by_token, is_member
+from OdinApi_v02.pagination import CustomPagination
+
 
 # # lista de usuarios
 # @api_view(['POST'])
@@ -1508,6 +1513,70 @@ def ver_pedido(request, id_pedido):
     }]
         
     return Response(data)
+
+
+# test
+# def serialize_producto(pr:ProductoFinal) -> Dict[str, Any]:
+#     # print('INICIO')
+#     # if pr.foto:
+#     #     print('SUPSER RATAS')
+#     return {
+#         'id': pr.id,
+#         'nombre':pr.nombre,
+#         'descripcion':pr.descripcion,
+#         'precio':pr.precio,
+#         'estado':pr.estado,
+#         'sucursal':str(pr.sucursal),
+#         'foto':pr.foto.url if pr.foto else None
+#     }
+
+# @api_view(['GET'])
+# @permission_classes([AllowAny,])
+# def lista_productos_paginator(request):
+    
+#     paginator = CustomPagination()
+#     # testcode = '''
+#     # ProductoFinal.objects.all()
+#     # '''
+#     # print(timeit.timeit(stmt=testcode))
+#     t0 = ti.time()
+#     query_set = ProductoFinal.objects.filter(id__gte=1,id__lte=5000).all()
+#     # context = paginator.paginate_queryset(query_set, request)
+#     # serializer = ProFinalSucursalSerializer(context, many=True)
+#     # serializer = serialize_producto(query_set)
+#     serializer = []
+#     # print(paginator.page_size)
+#     for x in query_set:
+#         # print(x)
+#         serializer.append(serialize_producto(x))
+#     # print(data)
+
+#     # print(serializer,' RATAMON')
+#     # data = paginator.get_paginated_response(serializer.data)
+#     t1 = ti.time()
+#     print('TIEMPO DEL SEGMENTE: ',"{:.6f}".format(t1-t0))
+#     return Response(serializer)
+
+# @api_view(['GET'])
+# @permission_classes([AllowAny,])
+# def lista_productos_paginator2(request):
+#     paginator = CustomPagination()
+#     t0 = ti.time()
+#     query_set = ProductoFinal.objects.filter(id__gte=1,id__lte=5000)
+#     # context = paginator.paginate_queryset(query_set, request)
+#     data = ProFinalSucursalSerializer(query_set, many=True).data
+#     # data = paginator.get_paginated_response(serializer.data)
+#     t1 = ti.time()
+#     print('TIEMPO DEL SEGMENTE: ',"{:.6f}".format(t1-t0))
+#     return Response(data)
+
+
+# class MyListAPIView(generics.ListAPIView):
+#     permission_classes = [AllowAny,]
+#     queryset = ProductoFinal.objects.all()
+#     serializer_class = ProFinalSucursalSerializer
+#     pagination_class = CustomPagination
+
 
 
 def get_hora_apertura(fecha):

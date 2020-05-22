@@ -2,6 +2,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    # path('test/0/', views.MyListAPIView.as_view(), name='-'),
+    # path('test/1/', views.lista_productos_paginator, name='Paginador'),
+    # path('test/2/', views.lista_productos_paginator2, name='Paginador'),
     # EMPRESA
     path('empresa/crear/', views.crearEmpresa, name='Crear Empresa'),
     path('empresa/<int:id_empresa>/editar/', views.editar_empresa, name='Modificar Empresa'),
@@ -27,6 +30,8 @@ urlpatterns = [
     path('empresa/sucursal/<int:id_sucursal>/producto/<str:estado>/', views.get_productos_estado_by_sucursal, name='Lista Producto por Sucursal (activos o inactivos)'),
     path('empresa/sucursal/<int:id_sucursal>/producto/<str:estado>/producto/', views.get_productos_estado_productos_by_sucursal, name='Lista Producto por Sucursal (activos o inactivos) productos'),
     path('empresa/sucursal/<int:id_sucursal>/producto/<str:estado>/combo/', views.get_productos_estado_combos_by_sucursal, name='Lista Producto por Sucursal (activos o inactivos) combos'),
+
+    
     # COMBO
     path('empresa/sucursal/combo/crear/', views.crear_combo, name='Crear Combo'),
     path('empresa/sucursal/combo/<int:id_combo>/editar/', views.editar_combo, name='Editar Combo'),
