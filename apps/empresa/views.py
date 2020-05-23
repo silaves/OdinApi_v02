@@ -37,7 +37,7 @@ from .serializers import (EmpresaSerializer, EmpresaEditarSerializer, SucursalSe
     ProductoFinalVerSerializer, ps,PedidosCustomSerializer,PedidosSucursalCustomSerializer, ProFinalSucursalSerializer,
     CategoriaEmpresaSerializer,ResponseCombo,SucursalEditarSerializer,ResponseComboEditar,ResponseProducto,ResponseProductodID,
     ResponsePedidos,ResponsePedidosEditar,CrearPedidoSerializer,EditarPedidoSerializer,ResponseTokenFirebase,PedidosRangoFecha_Sucursal,
-    VerCiudad_Serializer,RepartidorDisponible_Serializer,
+    VerCiudad_Serializer,RepartidorDisponible_Serializer,ProductoFinal_Paginator_Serializer,
     # crear combos
     CrearComboSerializer,EditarComboSerializer,VerProductoFinalSerializer,CambiarDisponibleSucursal_Serializer,CrearSucursal_Serializer,
     AgregarHorario_Serializer)
@@ -930,6 +930,7 @@ def get_pedidos_for_repartidor(request):
     hora_actual = make_aware(datetime.now())
     hora_inicio = get_hora_apertura(hora_actual)
     hora_fin = hora_actual
+    print(hora_actual,hora_inicio)
     pedidos = Pedido.objects.filter(sucursal__ciudad__id=usuario.ciudad.id,estado='E',repartidor=None,fecha__gte=hora_inicio,fecha__lte=hora_fin)
     data = PedidosSucursalCustomSerializer(pedidos, many=True).data
     return Response(data)
@@ -1530,45 +1531,36 @@ def ver_pedido(request, id_pedido):
 #         'foto':pr.foto.url if pr.foto else None
 #     }
 
-# @api_view(['GET'])
-# @permission_classes([AllowAny,])
-# def lista_productos_paginator(request):
+@api_view(['GET'])
+@permission_classes([AllowAny,])
+def lista_productos_paginator(request):
     
-#     paginator = CustomPagination()
-#     # testcode = '''
-#     # ProductoFinal.objects.all()
-#     # '''
-#     # print(timeit.timeit(stmt=testcode))
-#     t0 = ti.time()
-#     query_set = ProductoFinal.objects.filter(id__gte=1,id__lte=5000).all()
-#     # context = paginator.paginate_queryset(query_set, request)
-#     # serializer = ProFinalSucursalSerializer(context, many=True)
-#     # serializer = serialize_producto(query_set)
-#     serializer = []
-#     # print(paginator.page_size)
-#     for x in query_set:
-#         # print(x)
-#         serializer.append(serialize_producto(x))
-#     # print(data)
+    paginator = CustomPagination()
+    # testcode = '''
+    # ProductoFinal.objects.all()
+    # '''
+    # print(timeit.timeit(stmt=testcode))
+    t0 = ti.time()
+    query_set = ProductoFinal.objects.all()
+    context = paginator.paginate_queryset(query_set, request)
+    serializer = ProductoFinal_Paginator_Serializer(context, many=True)
+    data = paginator.get_paginated_response(serializer.data)
+    t1 = ti.time()
+    print('TIEMPO DEL SEGMENTE: ',"{:.6f}".format(t1-t0))
+    return data
 
-#     # print(serializer,' RATAMON')
-#     # data = paginator.get_paginated_response(serializer.data)
-#     t1 = ti.time()
-#     print('TIEMPO DEL SEGMENTE: ',"{:.6f}".format(t1-t0))
-#     return Response(serializer)
-
-# @api_view(['GET'])
-# @permission_classes([AllowAny,])
-# def lista_productos_paginator2(request):
-#     paginator = CustomPagination()
-#     t0 = ti.time()
-#     query_set = ProductoFinal.objects.filter(id__gte=1,id__lte=5000)
-#     # context = paginator.paginate_queryset(query_set, request)
-#     data = ProFinalSucursalSerializer(query_set, many=True).data
-#     # data = paginator.get_paginated_response(serializer.data)
-#     t1 = ti.time()
-#     print('TIEMPO DEL SEGMENTE: ',"{:.6f}".format(t1-t0))
-#     return Response(data)
+@api_view(['GET'])
+@permission_classes([AllowAny,])
+def lista_productos_paginator2(request):
+    paginator = CustomPagination()
+    t0 = ti.time()
+    query_set = ProductoFinal.objects.filter(id__gte=1,id__lte=5000)
+    # context = paginator.paginate_queryset(query_set, request)
+    data = ProFinalSucursalSerializer(query_set, many=True).data
+    # data = paginator.get_paginated_response(serializer.data)
+    t1 = ti.time()
+    print('TIEMPO DEL SEGMENTE: ',"{:.6f}".format(t1-t0))
+    return Response(data)
 
 
 # class MyListAPIView(generics.ListAPIView):
@@ -1663,7 +1655,7 @@ def validar_repartidor_activo(usuario):
     if perfil.disponibilidad != 'L':
         raise PermissionDenied('El usuario no esta disponible')
     ini = datetime.now().time()
-    if Horario.objects.filter(entrada__lte=ini,salida__gte=ini,estado=True).exists() is False:
+    if Horario.objects.filter(usuario__id=usuario.id,entrada__lte=ini,salida__gte=ini,estado=True).exists() is False:
         raise PermissionDenied('El usuario no esta en horario de trabajo')
     return True
 

@@ -384,6 +384,32 @@ class PedidosCustomSerializer(serializers.ModelSerializer):
 
 # PARA OBTENER PEDIDOS - SUCURSAL
 
+# --------------------------------  TEST ----------------------------------------
+# --------------------------------  TEST ----------------------------------------
+
+class ProductoFinal_Paginator_Serializer(serializers.Serializer):
+    
+    def to_representation(self, instance):
+        # combo = serializers.SerializerMethodField('cargar_pro')
+        return {
+            'id':instance.id,
+            'nombre':instance.nombre,
+            'descripcion':instance.descripcion,
+            'precio':instance.precio,
+            'estado':instance.estado,
+            # 'sucursal':instance.sucursal.id,
+            'foto':instance.foto.url if instance.foto else None,
+            'combo':True if Combo.objects.select_related('producto').exists() else False
+        }
+    
+    def cargar_pro(self, obj):
+        if Combo.objects.filter(combo__id=obj.id).count() > 0:
+            return True
+        else:
+            return False
+# --------------------------------  TEST ----------------------------------------
+# --------------------------------  TEST ----------------------------------------
+
 class ProFinalSucursalSerializer(serializers.ModelSerializer):
     foto = serializers.ImageField(max_length=None, use_url=True)
     combo = serializers.SerializerMethodField('cargar_pro')
@@ -421,6 +447,7 @@ class PedidosSucursalCustomSerializer(serializers.ModelSerializer):
     cliente = PerfilSerializer()
     sucursal = PedidoSucursalSerializer()
     productos = serializers.SerializerMethodField('cargar_productos')
+    repartidor = PerfilSerializer()
 
     class Meta:
         model = Pedido
