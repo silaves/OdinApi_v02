@@ -1014,7 +1014,7 @@ def get_pedidos_by_sucursal(request, id_sucursal, estado):
     operation_description='Devuelve la lista de pedidos de los ultmos 7 dias por sucursal segun el estado:\n\n\tA = activo\n\tE = en curso\n\tF = finalizados\n\tC = cancelados')
 @api_view(['GET'])
 @permission_classes((IsAuthenticated,))
-def get_pedidos_by_sucursal_semana(request,estado):
+def get_pedidos_by_sucursal_semana(request,id_sucursal,estado):
     usuario = get_user_by_token(request)
     # los pedidos se haran por dia laboral
     sucursal = revisar_sucursal(id_sucursal)
